@@ -1,0 +1,33 @@
+.SearchResultBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 60%;
+    height: fit-content;
+    margin-top: 2rem;
+    margin-left: 10rem;
+    cursor: pointer;
+  }
+  
+  .SearchResultBlock a {
+    font-size: 0.8rem;
+    text-decoration: none; 
+  }
+  
+  .SearchResultBlock h2 {
+    font-size: 1.4rem;
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
+  }
+  
+  .SearchResultBlock:hover h2 {
+    text-decoration: underline; 
+  }
+  
+  .SearchResultBlock span {
+    font-size: 0.85rem;
+    padding: 0;
+    margin: 0;
+  }
+  
