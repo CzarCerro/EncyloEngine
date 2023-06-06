@@ -1,0 +1,11 @@
+.input-group .form-control[type="search"]::-webkit-search-cancel-button {
+    cursor: pointer;
+  }
+  
+  .input-group .form-control[type="search"]::-moz-search-cancel-button {
+    cursor: pointer;
+  }
+  
+  .input-group .form-control[type="search"]::-ms-clear {
+    cursor: pointer;
+  }
