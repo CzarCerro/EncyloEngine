@@ -7,7 +7,7 @@ function Navbar({ searchQuery, handleSearchInputChange }) {
     return (
         <div className={styles.Navbar}>
             <div className={styles.NavbarSearchFrame}>
-                <Title fontSize={2.5} />
+                <Title fontSize={2} />
                 <SearchBar searchQuery={searchQuery} handleSearchInputChange={handleSearchInputChange} />
             </div>
         </div>

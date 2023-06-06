@@ -5,12 +5,13 @@
     padding-top: 1rem;
     padding-bottom: 1rem;
     padding-left: 5rem;
+    
 }
 
 .NavbarSearchFrame{
     display: flex;
     flex-direction: row;
-    gap: 3rem;
+    gap: 2.5rem;
     align-items: center;
     height: 100%;
 }

@@ -1,4 +1,7 @@
-.App h1 {
+.App h1,
+.App h2,
+.App span,
+.App a {
   color: white;
   font-family: 'Roboto', sans-serif;
 }

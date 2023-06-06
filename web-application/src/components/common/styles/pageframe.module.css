@@ -1,5 +1,10 @@
 .PageFrame {
     background-color: #282c34;
-    height: 100vh;
-    width: 100vw;
-}
+    min-height: 100vh;
+    
+    max-width: 100vw;
+    display: flex;
+    flex-direction: column;
+     overflow: auto;
+     padding-bottom: 3rem;
+  }
