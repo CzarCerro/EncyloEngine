@@ -1,0 +1,16 @@
+.Navbar{
+    background-color: #1a1c21;
+    width: 100%;
+    height: 6rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    padding-left: 5rem;
+}
+
+.NavbarSearchFrame{
+    display: flex;
+    flex-direction: row;
+    gap: 3rem;
+    align-items: center;
+    height: 100%;
+}
