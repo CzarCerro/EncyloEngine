@@ -3,6 +3,7 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import SearchResult from './pages/SearchResult';
+import 'bootstrap/dist/css/bootstrap.css';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
