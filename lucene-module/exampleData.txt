@@ -1,0 +1,12 @@
+[
+	{
+		"url": "www.encyclopedia.com/car",
+		"title": "Car",
+		"content": "This is the sample document has car"
+	},
+	{
+		"url": "www.encyclopedia.com/house",
+		"title": "House",
+		"content": "This is the sample document has house"
+	}
+]

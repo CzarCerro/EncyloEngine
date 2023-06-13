@@ -1,6 +1,6 @@
 
 public interface LuceneService {
 	void updateIndex();
-	void searchIndex();
+	void searchIndex(String query);
 	void deleteDocument();
 }

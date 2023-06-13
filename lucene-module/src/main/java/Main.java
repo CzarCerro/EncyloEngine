@@ -31,7 +31,10 @@ public class Main {
                     luceneService.updateIndex();
                     break;
                 case "searchIndex":
-                    luceneService.searchIndex();
+                	String query = args[1];
+                	if (args[1] != null) {
+                		luceneService.searchIndex(args[1]);
+                	}
                     break;
                 case "deleteDocument":
                     luceneService.deleteDocument();

@@ -1,10 +1,12 @@
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -16,58 +18,88 @@ import org.apache.lucene.util.QueryBuilder;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import com.google.gson.Gson;
+
+import model.SearchResult;
+
+import java.nio.file.Files;
 
 public class LuceneServiceImpl implements LuceneService{
 	
-    Path indexPath = Paths.get("index");
+    private static final Path indexPath = Paths.get("index");
     StandardAnalyzer analyzer = new StandardAnalyzer();
     IndexWriterConfig config = new IndexWriterConfig(analyzer);
-	
-	@Override
-	public void updateIndex() {
-
+    Gson gson = new Gson();
+    
+    
+    //Reads txt file and updates index
+    @Override
+    public void updateIndex() {
         try (IndexWriter indexWriter = new IndexWriter(FSDirectory.open(indexPath), config)) {
-            Document document = new Document();
-            document.add(new TextField("content", "This is the sample document content", Field.Store.YES));
-            indexWriter.addDocument(document);
+            String jsonData = Files.readString(Paths.get("exampleData.txt"));
+            
+            SearchResult[] dataArray = gson.fromJson(jsonData, SearchResult[].class);
+
+            for (SearchResult searchResult : dataArray) {
+                String id = searchResult.getUrl(); // Use URL as the document ID
+                Term idTerm = new Term("id", id); // Term representing the document ID
+                
+                Document document = new Document();
+                document.add(new StringField("id", id, Field.Store.YES)); // Store the document ID
+                document.add(new TextField("url", searchResult.getUrl(), Field.Store.YES));
+                document.add(new TextField("title", searchResult.getTitle(), Field.Store.YES));
+                document.add(new TextField("content", searchResult.getContent(), Field.Store.YES));
+                
+                indexWriter.updateDocument(idTerm, document); // Update the document with the given ID
+            }
+
             indexWriter.commit();
         } catch (IOException e) {
             e.printStackTrace();
         }
-	}
+    }
 
-	@Override
-	public void searchIndex() {
-        // Searching the index
-		String testQuery="sample document";
-		
+
+
+
+	//Returns documents corresponding to the query
+    @Override
+    public void searchIndex(String query) {
+        List<SearchResult> searchResults = new ArrayList<>();
+
+        // UPDATE INDEX
+        updateIndex();
+
         try (DirectoryReader directoryReader = DirectoryReader.open(FSDirectory.open(indexPath))) {
             IndexSearcher indexSearcher = new IndexSearcher(directoryReader);
             QueryBuilder queryBuilder = new QueryBuilder(analyzer);
-            Query query = queryBuilder.createPhraseQuery("content", testQuery);
-            TopDocs topDocs = indexSearcher.search(query, 10);
 
-            System.out.println("Search Results:");
-            Arrays.stream(topDocs.scoreDocs)
-                    .map(hit -> {
-                        try {
-                            return indexSearcher.doc(hit.doc);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .map(resultDoc -> {
-                        return resultDoc.get("content");
-                    })
-                    .forEach(System.out::println);
+            TopDocs topDocs = indexSearcher.search(queryBuilder.createPhraseQuery("content", query), 10);
+
+            for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
+                Document resultDoc = indexSearcher.doc(scoreDoc.doc);
+                SearchResult searchResult = new SearchResult();
+                searchResult.setUrl(resultDoc.get("url"));
+                searchResult.setTitle(resultDoc.get("title"));
+                searchResult.setContent(resultDoc.get("content"));
+                searchResults.add(searchResult);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-	}
+
+        System.out.println(searchResults.toString());
+    }
+
 	
 	@Override
 	public void deleteDocument() {
 		// TODO Auto-generated method stub
 	}
+
+
 }
