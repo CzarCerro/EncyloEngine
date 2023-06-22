@@ -5,13 +5,7 @@ import styles from './styles/searchresult.module.css'
 import SearchResultBlock from '../components/searchResultBlock/SearchResultBlock';
 import NoResultBlock from '../components/searchResultBlock/NoResultBlock';
 
-function SearchResult({ searchQuery, handleSearchInputChange }) {
-  const [searchResults, setSearchResults] = useState([]);
-
-  const handleSearchResults = (results) => {
-    setSearchResults(results);
-  };
-
+function SearchResult({ searchQuery, handleSearchInputChange, handleSearchResults, searchResults }) {
   return (
     <PageFrame>
       <Navbar 

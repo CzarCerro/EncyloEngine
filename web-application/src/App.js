@@ -7,6 +7,11 @@ import 'bootstrap/dist/css/bootstrap.css';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+
+  const handleSearchResults = (results) => {
+    setSearchResults(results);
+  };
 
   const handleSearchInputChange = (event) => {
     console.log(searchQuery)
@@ -22,6 +27,7 @@ function App() {
             element={<Home
               handleSearchInputChange={handleSearchInputChange}
               searchQuery={searchQuery}
+              handleSearchResults={handleSearchResults}
             />}
           />
           <Route
@@ -29,6 +35,8 @@ function App() {
             element={<SearchResult
               handleSearchInputChange={handleSearchInputChange}
               searchQuery={searchQuery}
+              handleSearchResults={handleSearchResults}
+              searchResults={searchResults}
             />}
           />
         </Routes>
