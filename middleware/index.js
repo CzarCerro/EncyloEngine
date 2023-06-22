@@ -1,8 +1,14 @@
 const express = require('express');
+const path = require("path");
 const { exec } = require('child_process');
 const app = express();
+const port = 5000;
+
+app.use(express.static(path.join(__dirname, '../web-application/build')));
 
 const luceneLocation = './lucene-module';
+
+
 
 /**
  * GET /search
@@ -31,6 +37,10 @@ app.get('/search', (req, res) => {
   });
 });
 
-app.listen(5000, () => {
-  console.log('Server listening on port 5000');
+app.use((req, res, next) => {
+  res.sendFile(path.join(__dirname, "..", "my-app", "build", "index.html"));
+});
+
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
 });
