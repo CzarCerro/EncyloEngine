@@ -92,7 +92,7 @@ public class LuceneServiceImpl implements LuceneService{
             e.printStackTrace();
         }
 
-        System.out.println(searchResults.toString());
+        System.out.println(searchResults.toString()); // Output to command line for node.js api to read
     }
 
 	
