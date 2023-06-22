@@ -38,7 +38,7 @@ app.get('/search', (req, res) => {
 });
 
 app.use((req, res, next) => {
-  res.sendFile(path.join(__dirname, "..", "my-app", "build", "index.html"));
+  res.sendFile(path.join(__dirname, "..", "web-application", "build", "index.html"));
 });
 
 app.listen(port, () => {
