@@ -1,0 +1,14 @@
+{
+  "name": "search-engine-middleware",
+  "version": "1.0.0",
+  "description": "Middleware to handle and process user requests from the search engine web application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
