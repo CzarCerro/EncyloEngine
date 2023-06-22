@@ -1,25 +1,39 @@
-import './styles/searchbar.css'
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import './styles/searchbar.css';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-function SearchBar({ searchQuery, handleSearchInputChange }) {
+function SearchBar({ searchQuery, handleSearchInputChange, handleSearchResults }) {
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = () => {
         if (searchQuery.trim() !== '') {
-            navigate('/searchResult');
+            setIsLoading(true);
+
+              axios.get(`http://localhost:5000/search?query=${encodeURIComponent(searchQuery)}`)
+                .then(response => {
+                  setIsLoading(false);
+                  console.log(response.data);
+                  handleSearchResults(response.data);
+                  navigate('/searchResult');
+                })
+                .catch(error => {
+                  setIsLoading(false);
+                  console.error('An error occurred during search:', error);
+                });
         }
     };
 
-
     return (
         <div>
-            <div class="input-group">
+            <div className="input-group">
                 <div style={{ display: 'flex', justifyContent: 'row' }}>
-                    <div class="form-outline">
+                    <div className="form-outline">
                         <input
                             id="search-focus"
                             type="search"
-                            class="form-control"
+                            className="form-control"
                             onChange={handleSearchInputChange}
                             placeholder="Enter your search query"
                             style={{
@@ -28,7 +42,7 @@ function SearchBar({ searchQuery, handleSearchInputChange }) {
                                 borderBottomRightRadius: '0',
                                 borderTopLeftRadius: '2rem',
                                 borderBottomLeftRadius: '2rem',
-                                boxShadow: 'none'
+                                boxShadow: 'none',
                             }}
                             value={searchQuery}
                         />
@@ -36,7 +50,8 @@ function SearchBar({ searchQuery, handleSearchInputChange }) {
                     <button
                         onClick={handleSubmit}
                         type="button"
-                        class="btn btn-primary"
+                        className={`btn btn-primary ${isLoading ? 'loading-button' : ''
+                            }`}
                         style={{
                             width: '5rem',
                             borderTopRightRadius: '2rem',
@@ -44,13 +59,14 @@ function SearchBar({ searchQuery, handleSearchInputChange }) {
                             borderTopLeftRadius: '0',
                             borderBottomLeftRadius: '0',
                         }}
+                        disabled={isLoading}
                     >
-                        <i class="fas fa-search"></i>
+                        <i className="fas fa-search"></i>
                     </button>
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
-export default SearchBar
+export default SearchBar;
