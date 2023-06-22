@@ -1,0 +1,10 @@
+.NoResultBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 60%;
+    height: fit-content;
+    margin-top: 2rem;
+    margin-left: 10rem;
+    cursor: pointer;
+  }

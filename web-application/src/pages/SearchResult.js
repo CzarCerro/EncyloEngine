@@ -1,29 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PageFrame from '../components/common/PageFrame';
 import Navbar from '../components/navBar/Navbar';
 import styles from './styles/searchresult.module.css'
 import SearchResultBlock from '../components/searchResultBlock/SearchResultBlock';
-import mockData from '../mockData.js'
-
+import NoResultBlock from '../components/searchResultBlock/NoResultBlock';
 
 function SearchResult({ searchQuery, handleSearchInputChange }) {
+  const [searchResults, setSearchResults] = useState([]);
 
-  const data = mockData();
+  const handleSearchResults = (results) => {
+    setSearchResults(results);
+  };
 
   return (
     <PageFrame>
-      <Navbar searchQuery={searchQuery} handleSearchInputChange={handleSearchInputChange} />
+      <Navbar 
+        searchQuery={searchQuery} 
+        handleSearchInputChange={handleSearchInputChange} 
+        handleSearchResults={handleSearchResults}
+      />
       <div className={styles.SearchResultBody}>
-        {
-          Array.from({ length: 10 }, (_, index) => (
+        {searchResults.length > 0 ? (
+          searchResults.map((result, index) => (
             <SearchResultBlock
               key={index}
-              url={data.url}
-              title={data.title}
-              content={data.content}
+              url={result.url}
+              title={result.title}
+              content={result.content}
             />
           ))
-        }
+        ) : (
+          <NoResultBlock searchQuery={searchQuery}/>
+        )}
       </div>
     </PageFrame>
   );
