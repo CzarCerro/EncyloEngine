@@ -1,1 +1,4 @@
 /.metadata/
+lucene-module/index/
+lucene-module/.metadata/
+lucene-module/.classpath
