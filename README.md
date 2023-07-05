@@ -16,7 +16,7 @@ java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIn
 ```
 cd web-application
 npm install
-npm build
+npm run build
 cd ..
 cd middleware
 npm install
