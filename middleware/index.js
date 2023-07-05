@@ -24,16 +24,14 @@ const luceneLocation = './lucene-module';
 app.get('/search', (req, res) => {
   const query = req.query.query;
 
-  //TODO: Additional logic to clean query
-
-  exec(`cd .. && cd ${luceneLocation} && java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIndex ${query}`, (error, stdout) => {
+  exec(`cd .. && cd ${luceneLocation} && java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIndex ${query}`, { encoding: 'latin1' }, (error, stdout) => {
     if (error) {
       console.error(`Error executing command: ${error.message}`);
       return res.status(500).send('An error occurred during search.');
     }
-
-    const searchResults = stdout.trim();
-    res.status(200).send(searchResults);
+    
+    const parsedResults = JSON.parse(stdout);
+    res.status(200).json(parsedResults);
   });
 });
 
