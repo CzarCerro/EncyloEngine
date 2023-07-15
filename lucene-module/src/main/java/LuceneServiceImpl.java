@@ -19,7 +19,9 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.QueryBuilder;
-
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Terms;
+import org.apache.lucene.index.TermsEnum;
 import com.google.gson.Gson;
 
 public class LuceneServiceImpl implements LuceneService{
@@ -57,36 +59,33 @@ public class LuceneServiceImpl implements LuceneService{
         }
     }
 
-
-
-
 	//Returns documents corresponding to the query
     @Override
     public void searchIndex(String query) {
         List<SearchResult> searchResults = new ArrayList<>();
-
+    
         // UPDATE INDEX
         updateIndex();
-
+    
         try (DirectoryReader directoryReader = DirectoryReader.open(FSDirectory.open(indexPath))) {
             IndexSearcher indexSearcher = new IndexSearcher(directoryReader);
             QueryBuilder queryBuilder = new QueryBuilder(analyzer);
-
+    
             TopDocs topDocs = indexSearcher.search(queryBuilder.createPhraseQuery("description", query), 10);
-
+    
             for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                 Document resultDoc = indexSearcher.doc(scoreDoc.doc);
                 SearchResult searchResult = new SearchResult();
                 searchResult.setUrl(resultDoc.get("canonical"));
                 searchResult.setTitle(resultDoc.get("title"));
                 searchResult.setContent(resultDoc.get("description").replace("\n", " ").replace("\"", "'"));
-
+    
                 searchResults.add(searchResult);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        System.out.println(searchResults.toString()); // Output to command line for node.js api to read
-    }
+    
+        System.out.println(searchResults.toString()); // Output to command line for node.js API to read
+    }    
 }
