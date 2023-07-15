@@ -24,12 +24,27 @@ const luceneLocation = './lucene-module';
 app.get('/search', (req, res) => {
   const query = req.query.query;
 
-  exec(`cd .. && cd ${luceneLocation} && java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIndex ${query}`, { encoding: 'latin1' }, (error, stdout) => {
-    if (error) {
-      console.error(`Error executing command: ${error.message}`);
+  let cleanedQuery = query.replace(/[^a-zA-Z0-9\s]/g, '');
+  console.log("Search term:" + cleanedQuery);
+  cleanedQuery = cleanedQuery.toLowerCase();
+  cleanedQuery = cleanedQuery.replace(/\s+/g, '+');
+  const childProcess = exec(`cd .. && cd ${luceneLocation} && java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIndex ${cleanedQuery}`, { encoding: 'latin1' });
+
+  let stdout = '';
+
+  childProcess.stdout.on('data', (data) => {
+    stdout += data;
+  });
+
+  childProcess.stderr.on('data', (data) => {
+    console.error(`Error executing command: ${data}`);
+  });
+
+  childProcess.on('close', (code) => {
+    if (code !== 0) {
       return res.status(500).send('An error occurred during search.');
     }
-    
+
     const parsedResults = JSON.parse(stdout);
     res.status(200).json(parsedResults);
   });
