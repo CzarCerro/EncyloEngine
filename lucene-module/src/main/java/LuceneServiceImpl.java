@@ -23,6 +23,9 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 import com.google.gson.Gson;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Query;
 
 public class LuceneServiceImpl implements LuceneService{
 	
@@ -62,6 +65,9 @@ public class LuceneServiceImpl implements LuceneService{
 	//Returns documents corresponding to the query
     @Override
     public void searchIndex(String query) {
+
+        String[] queryWords = query.split("\\+");
+
         List<SearchResult> searchResults = new ArrayList<>();
     
         // UPDATE INDEX
@@ -71,13 +77,23 @@ public class LuceneServiceImpl implements LuceneService{
             IndexSearcher indexSearcher = new IndexSearcher(directoryReader);
             QueryBuilder queryBuilder = new QueryBuilder(analyzer);
     
-            TopDocs topDocs = indexSearcher.search(queryBuilder.createPhraseQuery("description", query), 10);
+            
+
+            BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
+
+            for (String word : queryWords) {
+                Query termQuery = queryBuilder.createPhraseQuery("description", word);
+                booleanQueryBuilder.add(termQuery, BooleanClause.Occur.SHOULD);
+            }
+
+            Query booleanQuery = booleanQueryBuilder.build();
+            TopDocs topDescriptionDocs = indexSearcher.search(booleanQuery, 20);
     
-            for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
+            for (ScoreDoc scoreDoc : topDescriptionDocs.scoreDocs) {
                 Document resultDoc = indexSearcher.doc(scoreDoc.doc);
                 SearchResult searchResult = new SearchResult();
                 searchResult.setUrl(resultDoc.get("canonical"));
-                searchResult.setTitle(resultDoc.get("title"));
+                searchResult.setTitle(resultDoc.get("title").replace("\n", " ").replace("\"", "'"));
                 searchResult.setContent(resultDoc.get("description").replace("\n", " ").replace("\"", "'"));
     
                 searchResults.add(searchResult);
