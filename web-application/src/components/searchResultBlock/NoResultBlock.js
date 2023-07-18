@@ -1,11 +1,13 @@
+import React, { useState } from 'react';
 import styles from './styles/noresultblock.module.css'
 
 function NoResultBlock({searchQuery}) {
+  const notFoundQuery = useState(searchQuery)[0];
 
     return(
         <div className={styles.NoResultBlock}>
         <p>
-          Your search - <strong>{searchQuery}</strong> - did not match any documents.
+          Your search - <strong>{notFoundQuery}</strong> - did not match any documents.
         </p>
         <p>
           Suggestions:
