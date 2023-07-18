@@ -66,7 +66,7 @@ public class LuceneServiceImpl implements LuceneService{
 
 	//Returns documents corresponding to the query
     @Override
-    public void searchIndex(String query) {
+    public void searchIndex(String queryType, String query) {
 
         String[] queryWords = query.split("\\+");
 
@@ -80,7 +80,7 @@ public class LuceneServiceImpl implements LuceneService{
             BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 
             for (String word : queryWords) {
-                Query termQuery = queryBuilder.createPhraseQuery("description", word);
+                Query termQuery = queryBuilder.createPhraseQuery(queryType, word);
                 booleanQueryBuilder.add(termQuery, BooleanClause.Occur.SHOULD);
             }
 

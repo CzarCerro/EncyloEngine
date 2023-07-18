@@ -19,9 +19,9 @@ Go to lucene-module directory
 cd lucene-module
 ```
 
-Replace {SEARCH-TERM} with your search query. Example: java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIndex car
+Replace {SEARCH-TERM} with your search query. 
 ```
-java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIndex {SEARCH-TERM}
+java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIndex description {SEARCH-TERM}
 ```
 
 Command to compile
