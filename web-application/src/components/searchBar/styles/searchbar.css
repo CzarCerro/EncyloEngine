@@ -1,3 +1,32 @@
+.searchBar {
+  display: flex;
+  flex-direction: row;
+}
+
+.dropdown{
+  margin-left: 1.5rem;
+}
+
+.dropdownMenu{
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 999;
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  
+}
+
+.dropdownMenuItem{
+  width: 7rem;
+  height: 2.5rem;
+  background-color: #343a40;
+  color: white;
+}
+
 .input-group .form-control[type="search"]::-webkit-search-cancel-button {
     cursor: pointer;
   }
