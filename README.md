@@ -14,8 +14,27 @@ node index.js
 Next, access localhost:5000 to interact with the webpage
 
 ## Testing Lucene
-Replace {SEARCH-TERM} with your search query. Example: java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIndex car
+Go to lucene-module directory
 ```
 cd lucene-module
+```
+
+Replace {SEARCH-TERM} with your search query. Example: java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIndex car
+```
 java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIndex {SEARCH-TERM}
+```
+
+Command to compile
+```
+mvn clean package
+```
+
+Command to update index
+```
+java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar updateIndex
+```
+
+Command to get terms of a document
+```
+java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar getTermsOfDocument 5
 ```
