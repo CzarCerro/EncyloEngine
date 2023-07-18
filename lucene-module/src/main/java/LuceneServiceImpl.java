@@ -42,6 +42,8 @@ public class LuceneServiceImpl implements LuceneService{
             String jsonData = Files.readString(Paths.get("encyclopediadata.json"));
             
             SearchResult[] dataArray = gson.fromJson(jsonData, SearchResult[].class);
+
+            indexWriter.deleteAll();
             
             for (SearchResult searchResult : dataArray) {
                 String id = searchResult.getUrl(); // Use URL as the document ID
@@ -70,15 +72,11 @@ public class LuceneServiceImpl implements LuceneService{
 
         List<SearchResult> searchResults = new ArrayList<>();
     
-        // UPDATE INDEX
-        updateIndex();
-    
         try (DirectoryReader directoryReader = DirectoryReader.open(FSDirectory.open(indexPath))) {
             IndexSearcher indexSearcher = new IndexSearcher(directoryReader);
             QueryBuilder queryBuilder = new QueryBuilder(analyzer);
     
-            
-
+        
             BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 
             for (String word : queryWords) {
