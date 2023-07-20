@@ -4,6 +4,7 @@ public class SearchResult {
     private String canonical;
     private String title;
     private String description;
+    private float relevanceScore;
 
     public String getUrl() {
         return canonical;
@@ -29,12 +30,21 @@ public class SearchResult {
         this.description = content;
     }
     
+    public float setRelevanceScore() {
+        return relevanceScore;
+    }
+
+    public void setRelevanceScore(float relevanceScore) {
+        this.relevanceScore = relevanceScore;
+    }
+
     @Override
     public String toString() {
         return "{" +
                 "\"url\":\"" + canonical + "\"" +
                 ", \"title\":\"" + title + "\"" +
                 ", \"content\":\"" + description + "\"" +
+                ", \"relevanceScore\":\"" + relevanceScore + "\"" +
                 "}";
     }
 }

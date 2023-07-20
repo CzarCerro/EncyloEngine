@@ -120,6 +120,7 @@ public class LuceneServiceImpl implements LuceneService{
                 searchResult.setUrl(resultDoc.get("canonical"));
                 searchResult.setTitle(resultDoc.get("title").replace("\n", " ").replace("\"", "'"));
                 searchResult.setContent(resultDoc.get("description").replace("\n", " ").replace("\"", "'"));
+                searchResult.setRelevanceScore(scoreDoc.score);
                 
                 existingIDSet.add(resultDoc.get("id"));
 
@@ -147,7 +148,7 @@ public class LuceneServiceImpl implements LuceneService{
                             searchResult.setUrl(resultDoc.get("canonical"));
                             searchResult.setTitle(resultDoc.get("title").replace("\n", " ").replace("\"", "'"));
                             searchResult.setContent(resultDoc.get("description").replace("\n", " ").replace("\"", "'"));
-            
+                            searchResult.setRelevanceScore(scoreDoc.score);
                             descriptionSearchResults.add(searchResult);
 
                             remainingResultCount--;
