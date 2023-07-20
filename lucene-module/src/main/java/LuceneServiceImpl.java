@@ -124,7 +124,7 @@ public class LuceneServiceImpl implements LuceneService{
                 
                 existingIDSet.add(resultDoc.get("id"));
 
-                prioritizedSearchResults.add(searchResult);
+                searchResults.add(searchResult);
                 remainingResultCount--;
             }
     
@@ -139,7 +139,6 @@ public class LuceneServiceImpl implements LuceneService{
                     if (remainingResultCount == 0) {
                         break;
                     }
-
                         Document resultDoc = indexSearcher.doc(scoreDoc.doc);
 
                         if(!existingIDSet.contains(resultDoc.get("id"))) { //Check if description ID already exists in existingIDSet
@@ -149,16 +148,12 @@ public class LuceneServiceImpl implements LuceneService{
                             searchResult.setTitle(resultDoc.get("title").replace("\n", " ").replace("\"", "'"));
                             searchResult.setContent(resultDoc.get("description").replace("\n", " ").replace("\"", "'"));
                             searchResult.setRelevanceScore(scoreDoc.score);
-                            descriptionSearchResults.add(searchResult);
+                            searchResults.add(searchResult);
 
                             remainingResultCount--;
                     }
                 }
             }
-    
-            // Combine the results from 'title' and 'description' searches with title results first
-            searchResults.addAll(prioritizedSearchResults);
-            searchResults.addAll(descriptionSearchResults);
     
             System.out.println(searchResults.toString()); // Output to command line for node.js API to read
     
