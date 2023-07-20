@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -71,28 +73,32 @@ public class LuceneServiceImpl implements LuceneService{
     public void searchIndex(String searchType, String query) {
         String[] queryWords = query.split("\\+");
     
+        boolean multiSearch = false;
+
+        Set<String> existingIDSet = new HashSet<>();
+
         List<SearchResult> searchResults = new ArrayList<>();
-        List<SearchResult> titleSearchResults = new ArrayList<>();
+        List<SearchResult> prioritizedSearchResults = new ArrayList<>();
         List<SearchResult> descriptionSearchResults = new ArrayList<>();
     
         try (DirectoryReader directoryReader = DirectoryReader.open(FSDirectory.open(indexPath))) {
             IndexSearcher indexSearcher = new IndexSearcher(directoryReader);
             QueryBuilder queryBuilder = new QueryBuilder(analyzer);
     
-            BooleanQuery.Builder titleQueryBuilder = new BooleanQuery.Builder();
+            BooleanQuery.Builder prioritizedQueryBuilder = new BooleanQuery.Builder();
             BooleanQuery.Builder descriptionQueryBuilder = new BooleanQuery.Builder();
     
             for (String word : queryWords) {
                 try {
                     if (searchType.equals("all")) {
+                        multiSearch = true;
                         Query titleQuery = queryBuilder.createPhraseQuery("title", word);
                         Query descriptionQuery = queryBuilder.createPhraseQuery("description", word);
-                        titleQueryBuilder.add(titleQuery, BooleanClause.Occur.SHOULD);
+                        prioritizedQueryBuilder.add(titleQuery, BooleanClause.Occur.SHOULD);
                         descriptionQueryBuilder.add(descriptionQuery, BooleanClause.Occur.SHOULD);
                     } else {
                         Query termQuery = queryBuilder.createPhraseQuery(searchType, word);
-                        titleQueryBuilder.add(termQuery, BooleanClause.Occur.SHOULD);
-                        descriptionQueryBuilder.add(termQuery, BooleanClause.Occur.SHOULD);
+                        prioritizedQueryBuilder.add(termQuery, BooleanClause.Occur.SHOULD);
                     }
                 } catch (NullPointerException e) {
                     // Handle null pointer exceptions
@@ -100,12 +106,12 @@ public class LuceneServiceImpl implements LuceneService{
             }
     
             // Build separate boolean queries for 'title' and 'description'
-            Query titleQuery = titleQueryBuilder.build();
+            Query titleQuery = prioritizedQueryBuilder.build();
             Query descriptionQuery = descriptionQueryBuilder.build();
     
             // Search for 'title' query first and get the results
             TopDocs topTitleDocs = indexSearcher.search(titleQuery, RESULT_LIMIT);
-            int remainingResults = RESULT_LIMIT;
+            int remainingResultCount = RESULT_LIMIT;
     
             // Process the results for 'title' search
             for (ScoreDoc scoreDoc : topTitleDocs.scoreDocs) {
@@ -114,30 +120,43 @@ public class LuceneServiceImpl implements LuceneService{
                 searchResult.setUrl(resultDoc.get("canonical"));
                 searchResult.setTitle(resultDoc.get("title").replace("\n", " ").replace("\"", "'"));
                 searchResult.setContent(resultDoc.get("description").replace("\n", " ").replace("\"", "'"));
-    
-                titleSearchResults.add(searchResult);
-                remainingResults--;
+                
+                existingIDSet.add(resultDoc.get("id"));
+
+                prioritizedSearchResults.add(searchResult);
+                remainingResultCount--;
             }
     
             // Check if more results are needed from 'description' search
-            if (remainingResults > 0) {
+            if (remainingResultCount > 0 && multiSearch) {
                 // Search for 'description' query to get the remaining results
-                TopDocs topDescriptionDocs = indexSearcher.search(descriptionQuery, remainingResults);
-    
+
+                TopDocs topDescriptionDocs = indexSearcher.search(descriptionQuery, Integer.MAX_VALUE);
+
                 // Process the results for 'description' search
                 for (ScoreDoc scoreDoc : topDescriptionDocs.scoreDocs) {
-                    Document resultDoc = indexSearcher.doc(scoreDoc.doc);
-                    SearchResult searchResult = new SearchResult();
-                    searchResult.setUrl(resultDoc.get("canonical"));
-                    searchResult.setTitle(resultDoc.get("title").replace("\n", " ").replace("\"", "'"));
-                    searchResult.setContent(resultDoc.get("description").replace("\n", " ").replace("\"", "'"));
-    
-                    descriptionSearchResults.add(searchResult);
+                    if (remainingResultCount == 0) {
+                        break;
+                    }
+
+                        Document resultDoc = indexSearcher.doc(scoreDoc.doc);
+
+                        if(!existingIDSet.contains(resultDoc.get("id"))) { //Check if description ID already exists in existingIDSet
+
+                            SearchResult searchResult = new SearchResult();
+                            searchResult.setUrl(resultDoc.get("canonical"));
+                            searchResult.setTitle(resultDoc.get("title").replace("\n", " ").replace("\"", "'"));
+                            searchResult.setContent(resultDoc.get("description").replace("\n", " ").replace("\"", "'"));
+            
+                            descriptionSearchResults.add(searchResult);
+
+                            remainingResultCount--;
+                    }
                 }
             }
     
             // Combine the results from 'title' and 'description' searches with title results first
-            searchResults.addAll(titleSearchResults);
+            searchResults.addAll(prioritizedSearchResults);
             searchResults.addAll(descriptionSearchResults);
     
             System.out.println(searchResults.toString()); // Output to command line for node.js API to read
