@@ -1,7 +1,7 @@
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.FSDirectory;
@@ -21,7 +21,7 @@ public class UtilityServiceImpl implements UtilityService{
             String description = document.get("description");
 
             if (description != null) {
-                StandardAnalyzer analyzer = new StandardAnalyzer();
+                EnglishAnalyzer analyzer = new EnglishAnalyzer();
                 TokenStream tokenStream = analyzer.tokenStream("", description);
     
                 CharTermAttribute termAttribute = tokenStream.addAttribute(CharTermAttribute.class);

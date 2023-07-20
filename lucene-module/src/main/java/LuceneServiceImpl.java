@@ -26,11 +26,12 @@ import com.google.gson.Gson;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 
 public class LuceneServiceImpl implements LuceneService{
 	
     private static final Path indexPath = Paths.get("index");
-    StandardAnalyzer analyzer = new StandardAnalyzer();
+    EnglishAnalyzer analyzer = new EnglishAnalyzer();
     IndexWriterConfig config = new IndexWriterConfig(analyzer);
     Gson gson = new Gson();
     
@@ -67,23 +68,25 @@ public class LuceneServiceImpl implements LuceneService{
 	//Returns documents corresponding to the query
     @Override
     public void searchIndex(String queryType, String query) {
-
         String[] queryWords = query.split("\\+");
-
+    
         List<SearchResult> searchResults = new ArrayList<>();
     
         try (DirectoryReader directoryReader = DirectoryReader.open(FSDirectory.open(indexPath))) {
             IndexSearcher indexSearcher = new IndexSearcher(directoryReader);
             QueryBuilder queryBuilder = new QueryBuilder(analyzer);
     
-        
             BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
-
+    
             for (String word : queryWords) {
-                Query termQuery = queryBuilder.createPhraseQuery(queryType, word);
-                booleanQueryBuilder.add(termQuery, BooleanClause.Occur.SHOULD);
+                try {
+                    Query termQuery = queryBuilder.createPhraseQuery(queryType, word);
+                    booleanQueryBuilder.add(termQuery, BooleanClause.Occur.SHOULD);
+                } catch (NullPointerException e) {
+                    
+                }
             }
-
+    
             Query booleanQuery = booleanQueryBuilder.build();
             TopDocs topDescriptionDocs = indexSearcher.search(booleanQuery, 20);
     
@@ -101,5 +104,6 @@ public class LuceneServiceImpl implements LuceneService{
         }
     
         System.out.println(searchResults.toString()); // Output to command line for node.js API to read
-    }    
+    }
+        
 }
