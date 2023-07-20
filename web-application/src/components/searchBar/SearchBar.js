@@ -8,9 +8,9 @@ function SearchBar({ searchQuery, handleSearchInputChange, handleSearchResults }
     const [isLoading, setIsLoading] = useState(false);
 
     const [queryTypeIsDropped, setQueryTypeIsDropped] = useState(false);
-    const [selectedOption, setSelectedOption] = useState('Description');
+    const [selectedOption, setSelectedOption] = useState('All');
 
-    const queryTypeOptions = ['Title', 'Description']
+    const queryTypeOptions = ['All', 'Title', 'Description']
 
     const toggleQueryTypeDropdown = () => {
         setQueryTypeIsDropped(!queryTypeIsDropped);
