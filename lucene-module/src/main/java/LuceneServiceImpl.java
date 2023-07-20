@@ -3,11 +3,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
+import org.apache.lucene.analysis.synonym.SynonymGraphFilterFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -28,7 +32,13 @@ import com.google.gson.Gson;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
+import org.apache.lucene.analysis.core.StopFilterFactory;
+import org.apache.lucene.analysis.custom.CustomAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.en.EnglishPossessiveFilterFactory;
+import org.apache.lucene.analysis.en.PorterStemFilterFactory;
 
 public class LuceneServiceImpl implements LuceneService{
 	
@@ -83,7 +93,11 @@ public class LuceneServiceImpl implements LuceneService{
     
         try (DirectoryReader directoryReader = DirectoryReader.open(FSDirectory.open(indexPath))) {
             IndexSearcher indexSearcher = new IndexSearcher(directoryReader);
-            QueryBuilder queryBuilder = new QueryBuilder(analyzer);
+            
+            Analyzer queryAnalyzer = customAnalyzer();
+            QueryBuilder queryBuilder = new QueryBuilder(queryAnalyzer); //Synonym Analyzer
+            
+            //QueryBuilder queryBuilder = new QueryBuilder(analyzer); //Default Analyzer
     
             BooleanQuery.Builder prioritizedQueryBuilder = new BooleanQuery.Builder();
             BooleanQuery.Builder descriptionQueryBuilder = new BooleanQuery.Builder();
@@ -160,6 +174,23 @@ public class LuceneServiceImpl implements LuceneService{
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    // Create CustomAnalyzer for Query Expansion with Synonyms
+    private static CustomAnalyzer customAnalyzer() throws IOException {
+        Map<String, String> sargs = new HashMap<>();
+        sargs.put("synonyms", "wn_s.pl");
+        sargs.put("format", "wordnet");
+
+        CustomAnalyzer.Builder builder = CustomAnalyzer.builder()
+                .withTokenizer(StandardTokenizerFactory.class)
+                .addTokenFilter(EnglishPossessiveFilterFactory.class)
+                .addTokenFilter(LowerCaseFilterFactory.class)
+                .addTokenFilter(StopFilterFactory.class)
+                .addTokenFilter(PorterStemFilterFactory.class)
+                .addTokenFilter(SynonymGraphFilterFactory.class, sargs);
+        
+        return builder.build();
     }
     
 }
