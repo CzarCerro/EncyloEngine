@@ -35,6 +35,7 @@ public class LuceneServiceImpl implements LuceneService{
     IndexWriterConfig config = new IndexWriterConfig(analyzer);
     Gson gson = new Gson();
     
+    private final int RESULT_LIMIT = 50;
     
     //Reads txt file and updates index
     @Override
@@ -67,43 +68,83 @@ public class LuceneServiceImpl implements LuceneService{
 
 	//Returns documents corresponding to the query
     @Override
-    public void searchIndex(String queryType, String query) {
+    public void searchIndex(String searchType, String query) {
         String[] queryWords = query.split("\\+");
     
         List<SearchResult> searchResults = new ArrayList<>();
+        List<SearchResult> titleSearchResults = new ArrayList<>();
+        List<SearchResult> descriptionSearchResults = new ArrayList<>();
     
         try (DirectoryReader directoryReader = DirectoryReader.open(FSDirectory.open(indexPath))) {
             IndexSearcher indexSearcher = new IndexSearcher(directoryReader);
             QueryBuilder queryBuilder = new QueryBuilder(analyzer);
     
-            BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
+            BooleanQuery.Builder titleQueryBuilder = new BooleanQuery.Builder();
+            BooleanQuery.Builder descriptionQueryBuilder = new BooleanQuery.Builder();
     
             for (String word : queryWords) {
                 try {
-                    Query termQuery = queryBuilder.createPhraseQuery(queryType, word);
-                    booleanQueryBuilder.add(termQuery, BooleanClause.Occur.SHOULD);
+                    if (searchType.equals("all")) {
+                        Query titleQuery = queryBuilder.createPhraseQuery("title", word);
+                        Query descriptionQuery = queryBuilder.createPhraseQuery("description", word);
+                        titleQueryBuilder.add(titleQuery, BooleanClause.Occur.SHOULD);
+                        descriptionQueryBuilder.add(descriptionQuery, BooleanClause.Occur.SHOULD);
+                    } else {
+                        Query termQuery = queryBuilder.createPhraseQuery(searchType, word);
+                        titleQueryBuilder.add(termQuery, BooleanClause.Occur.SHOULD);
+                        descriptionQueryBuilder.add(termQuery, BooleanClause.Occur.SHOULD);
+                    }
                 } catch (NullPointerException e) {
-                    
+                    // Handle null pointer exceptions
                 }
             }
     
-            Query booleanQuery = booleanQueryBuilder.build();
-            TopDocs topDescriptionDocs = indexSearcher.search(booleanQuery, 20);
+            // Build separate boolean queries for 'title' and 'description'
+            Query titleQuery = titleQueryBuilder.build();
+            Query descriptionQuery = descriptionQueryBuilder.build();
     
-            for (ScoreDoc scoreDoc : topDescriptionDocs.scoreDocs) {
+            // Search for 'title' query first and get the results
+            TopDocs topTitleDocs = indexSearcher.search(titleQuery, RESULT_LIMIT);
+            int remainingResults = RESULT_LIMIT;
+    
+            // Process the results for 'title' search
+            for (ScoreDoc scoreDoc : topTitleDocs.scoreDocs) {
                 Document resultDoc = indexSearcher.doc(scoreDoc.doc);
                 SearchResult searchResult = new SearchResult();
                 searchResult.setUrl(resultDoc.get("canonical"));
                 searchResult.setTitle(resultDoc.get("title").replace("\n", " ").replace("\"", "'"));
                 searchResult.setContent(resultDoc.get("description").replace("\n", " ").replace("\"", "'"));
     
-                searchResults.add(searchResult);
+                titleSearchResults.add(searchResult);
+                remainingResults--;
             }
+    
+            // Check if more results are needed from 'description' search
+            if (remainingResults > 0) {
+                // Search for 'description' query to get the remaining results
+                TopDocs topDescriptionDocs = indexSearcher.search(descriptionQuery, remainingResults);
+    
+                // Process the results for 'description' search
+                for (ScoreDoc scoreDoc : topDescriptionDocs.scoreDocs) {
+                    Document resultDoc = indexSearcher.doc(scoreDoc.doc);
+                    SearchResult searchResult = new SearchResult();
+                    searchResult.setUrl(resultDoc.get("canonical"));
+                    searchResult.setTitle(resultDoc.get("title").replace("\n", " ").replace("\"", "'"));
+                    searchResult.setContent(resultDoc.get("description").replace("\n", " ").replace("\"", "'"));
+    
+                    descriptionSearchResults.add(searchResult);
+                }
+            }
+    
+            // Combine the results from 'title' and 'description' searches with title results first
+            searchResults.addAll(titleSearchResults);
+            searchResults.addAll(descriptionSearchResults);
+    
+            System.out.println(searchResults.toString()); // Output to command line for node.js API to read
+    
         } catch (IOException e) {
             e.printStackTrace();
         }
-    
-        System.out.println(searchResults.toString()); // Output to command line for node.js API to read
     }
-        
+    
 }

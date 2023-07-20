@@ -12,10 +12,10 @@ public class Main {
                     luceneService.updateIndex();
                     break;
                 case "searchIndex":
-                    String queryType = args[1];
+                    String searchType = args[1];
                 	String query = args[2];
-                	if (queryType != null && query != null) {
-                		luceneService.searchIndex(queryType, query);
+                	if (searchType != null && query != null) {
+                		luceneService.searchIndex(searchType, query);
                 	}
                     break;
                 case "getTermsOfDocument":

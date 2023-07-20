@@ -1,4 +1,4 @@
 public interface LuceneService {
 	void updateIndex();
-	void searchIndex(String queryType, String query);
+	void searchIndex(String searchType, String query);
 }
