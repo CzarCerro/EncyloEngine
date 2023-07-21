@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PageFrame from '../components/common/PageFrame';
 import Navbar from '../components/navBar/Navbar';
 import styles from './styles/searchresult.module.css'
