@@ -17,6 +17,13 @@ node index.js
 ```
 Next, access localhost:5000 to interact with the webpage
 
+## Running with Docker
+```
+docker run -t app .
+docker run -p 5000:5000 app
+```
+Next, access localhost:5000 to interact with the webpage
+
 ## Testing Lucene
 Go to lucene-module directory
 ```
