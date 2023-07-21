@@ -1,0 +1,21 @@
+# Docker services
+version: '3.8'
+services:
+  web-application:
+    build:
+      context: ./web-application
+    ports:
+      - "5000:5000"
+
+  lucene-module:
+    build:
+      context: ./lucene-module
+
+  middleware:
+    build:
+      context: ./middleware
+    ports:
+      - "5000:5000"
+    depends_on:
+      - web-application
+      - lucene-module
