@@ -7,7 +7,7 @@ import SwitchButton from '../common/SwitchButton';
 function SearchBar({ searchQuery, handleSearchInputChange, handleSearchResults }) {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
-
+    const [isLoaded, setIsLoaded] = useState(false);
     const [queryTypeIsDropped, setQueryTypeIsDropped] = useState(false);
     const [selectedOption, setSelectedOption] = useState(localStorage.getItem('searchType') || 'All');
     const [wordnetIsEnabled, setWordnetIsEnabled] = useState(JSON.parse(localStorage.getItem('wordnetIsEnabled')) || false
@@ -42,6 +42,7 @@ function SearchBar({ searchQuery, handleSearchInputChange, handleSearchResults }
                     setIsLoading(false);
                     console.log(response.data);
                     handleSearchResults(response.data);
+                    localStorage.setItem('query', searchQuery);
                     navigate('/searchResult');
                 })
                 .catch(error => {
@@ -50,6 +51,16 @@ function SearchBar({ searchQuery, handleSearchInputChange, handleSearchResults }
                 });
         }
     };
+
+    useEffect(() => {
+        setIsLoaded(true);
+    }, [])
+
+    useEffect(()=>{
+        if (localStorage.getItem('query') && isLoaded) {
+            handleSubmit();
+        }
+    }, [isLoaded])
 
     useEffect(() => {
         localStorage.setItem('searchType', selectedOption);

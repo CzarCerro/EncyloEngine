@@ -6,7 +6,7 @@ import SearchResult from './pages/SearchResult';
 import 'bootstrap/dist/css/bootstrap.css';
 
 function App() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(localStorage.getItem('query') || '');
   const [searchResults, setSearchResults] = useState([]);
 
   const handleSearchResults = (results) => {
