@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './styles/searchbar.css';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -7,10 +7,11 @@ import SwitchButton from '../common/SwitchButton';
 function SearchBar({ searchQuery, handleSearchInputChange, handleSearchResults }) {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
-
+    const [isLoaded, setIsLoaded] = useState(false);
     const [queryTypeIsDropped, setQueryTypeIsDropped] = useState(false);
-    const [selectedOption, setSelectedOption] = useState('All');
-    const [wordnetIsEnabled, setWordnetIsEnabled] = useState(false);
+    const [selectedOption, setSelectedOption] = useState(localStorage.getItem('searchType') || 'All');
+    const [wordnetIsEnabled, setWordnetIsEnabled] = useState(JSON.parse(localStorage.getItem('wordnetIsEnabled')) || false
+      );
 
     const queryTypeOptions = ['All', 'Title', 'Description']
 
@@ -41,6 +42,7 @@ function SearchBar({ searchQuery, handleSearchInputChange, handleSearchResults }
                     setIsLoading(false);
                     console.log(response.data);
                     handleSearchResults(response.data);
+                    localStorage.setItem('query', searchQuery);
                     navigate('/searchResult');
                 })
                 .catch(error => {
@@ -49,6 +51,24 @@ function SearchBar({ searchQuery, handleSearchInputChange, handleSearchResults }
                 });
         }
     };
+
+    useEffect(() => {
+        setIsLoaded(true);
+    }, [])
+
+    useEffect(()=>{
+        if (localStorage.getItem('query') && isLoaded) {
+            handleSubmit();
+        }
+    }, [isLoaded])
+
+    useEffect(() => {
+        localStorage.setItem('searchType', selectedOption);
+    }, [selectedOption])
+
+    useEffect(() => {
+        localStorage.setItem('wordnetIsEnabled', wordnetIsEnabled);
+    }, [wordnetIsEnabled])
 
     return (
         <div className="searchBar">

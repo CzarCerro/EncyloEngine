@@ -9,6 +9,7 @@ const SwitchButton = ({isToggled, handleToggle}) => {
         id={`react-switch-new`}
         type="checkbox"
         onChange={handleToggle}
+        checked={isToggled}
       />
         <label
         style={{ background: isToggled && '#06D6A0' }}

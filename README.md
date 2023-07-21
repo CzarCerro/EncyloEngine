@@ -8,8 +8,9 @@ npm install
 npm run build
 cd ..
 cd lucene-module
-java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar updateIndex
+mvn install
 mvn clean package
+java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar updateIndex
 cd ..
 cd middleware
 npm install
