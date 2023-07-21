@@ -24,12 +24,13 @@ const luceneLocation = './lucene-module';
 app.get('/search', (req, res) => {
   const query = req.query.query;
   const queryType = req.query.queryType.toLowerCase();
+  const wordnetEnabled = req.query.wordnetEnabled;
 
   let cleanedQuery = query.replace(/[^a-zA-Z0-9\s]/g, '');
-  console.log("Search " + queryType + " with search term: " + cleanedQuery);
+  console.log("Search " + queryType + " with search term: " + cleanedQuery + " with wordnetEnabled as " + wordnetEnabled);
   cleanedQuery = cleanedQuery.toLowerCase();
   cleanedQuery = cleanedQuery.replace(/\s+/g, '+');
-  const childProcess = exec(`cd .. && cd ${luceneLocation} && java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIndex ${queryType} ${cleanedQuery}`, { encoding: 'latin1' });
+  const childProcess = exec(`cd .. && cd ${luceneLocation} && java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIndex ${queryType} ${cleanedQuery} ${wordnetEnabled}`, { encoding: 'latin1' });
 
   let stdout = '';
 

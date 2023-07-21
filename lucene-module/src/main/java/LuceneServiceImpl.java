@@ -3,11 +3,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
+import org.apache.lucene.analysis.synonym.SynonymGraphFilterFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -28,13 +32,18 @@ import com.google.gson.Gson;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
+import org.apache.lucene.analysis.core.StopFilterFactory;
+import org.apache.lucene.analysis.custom.CustomAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.en.EnglishPossessiveFilterFactory;
+import org.apache.lucene.analysis.en.PorterStemFilterFactory;
 
 public class LuceneServiceImpl implements LuceneService{
 	
     private static final Path indexPath = Paths.get("index");
-    EnglishAnalyzer analyzer = new EnglishAnalyzer();
-    IndexWriterConfig config = new IndexWriterConfig(analyzer);
+
     Gson gson = new Gson();
     
     private final int RESULT_LIMIT = 50;
@@ -42,7 +51,7 @@ public class LuceneServiceImpl implements LuceneService{
     //Reads txt file and updates index
     @Override
     public void updateIndex() {
-        try (IndexWriter indexWriter = new IndexWriter(FSDirectory.open(indexPath), config)) {
+        try (IndexWriter indexWriter = new IndexWriter(FSDirectory.open(indexPath), setConfig())) {
             String jsonData = Files.readString(Paths.get("encyclopediadata.json"));
             
             SearchResult[] dataArray = gson.fromJson(jsonData, SearchResult[].class);
@@ -70,7 +79,7 @@ public class LuceneServiceImpl implements LuceneService{
 
 	//Returns documents corresponding to the query
     @Override
-    public void searchIndex(String searchType, String query) {
+    public void searchIndex(String searchType, String query, boolean wordnetEnabled) {
         String[] queryWords = query.split("\\+");
     
         boolean multiSearch = false;
@@ -83,7 +92,11 @@ public class LuceneServiceImpl implements LuceneService{
     
         try (DirectoryReader directoryReader = DirectoryReader.open(FSDirectory.open(indexPath))) {
             IndexSearcher indexSearcher = new IndexSearcher(directoryReader);
-            QueryBuilder queryBuilder = new QueryBuilder(analyzer);
+            
+            Analyzer queryAnalyzer = customAnalyzer(wordnetEnabled);
+            QueryBuilder queryBuilder = new QueryBuilder(queryAnalyzer); //Synonym Analyzer
+            
+            //QueryBuilder queryBuilder = new QueryBuilder(analyzer); //Default Analyzer
     
             BooleanQuery.Builder prioritizedQueryBuilder = new BooleanQuery.Builder();
             BooleanQuery.Builder descriptionQueryBuilder = new BooleanQuery.Builder();
@@ -160,6 +173,31 @@ public class LuceneServiceImpl implements LuceneService{
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    //Set and return indexWriter configuration 
+    private static IndexWriterConfig setConfig() throws IOException {
+        IndexWriterConfig config = new IndexWriterConfig(customAnalyzer(false));
+        return config;
+    }
+
+    // Create CustomAnalyzer for Query Expansion with Synonyms
+    private static CustomAnalyzer customAnalyzer(boolean wordnetEnabled) throws IOException {
+        CustomAnalyzer.Builder builder = CustomAnalyzer.builder()
+                .withTokenizer(StandardTokenizerFactory.class)
+                .addTokenFilter(EnglishPossessiveFilterFactory.class)
+                .addTokenFilter(LowerCaseFilterFactory.class)
+                .addTokenFilter(StopFilterFactory.class)
+                .addTokenFilter(PorterStemFilterFactory.class);
+    
+        if (wordnetEnabled) {
+            Map<String, String> sargs = new HashMap<>();
+            sargs.put("synonyms", "wn_s.pl");
+            sargs.put("format", "wordnet");
+            builder.addTokenFilter(SynonymGraphFilterFactory.class, sargs);
+        }
+    
+        return builder.build();
     }
     
 }

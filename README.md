@@ -7,6 +7,10 @@ cd web-application
 npm install
 npm run build
 cd ..
+cd lucene-module
+java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar updateIndex
+mvn clean package
+cd ..
 cd middleware
 npm install
 node index.js
@@ -21,7 +25,7 @@ cd lucene-module
 
 Replace {SEARCH-TERM} with your search query. 
 ```
-java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIndex description {SEARCH-TERM}
+java -jar target/lucene-module-0.0.1-SNAPSHOT-jar-with-dependencies.jar searchIndex all {SEARCH-TERM} false
 ```
 
 Command to compile

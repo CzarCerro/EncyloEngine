@@ -4,7 +4,7 @@
 }
 
 .dropdown{
-  margin-left: 1.5rem;
+  margin-left: 1rem;
 }
 
 .dropdownMenu{
@@ -17,7 +17,6 @@
   flex-direction: column;
   margin: 0;
   padding: 0;
-  
 }
 
 .dropdownMenuItem{
@@ -37,4 +36,13 @@
   
   .input-group .form-control[type="search"]::-ms-clear {
     cursor: pointer;
+  }
+
+  .switchButtonFrame{
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    color: white;
+    padding-left: 1rem;
+    gap: 0.2rem;
   }
