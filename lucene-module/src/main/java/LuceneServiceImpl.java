@@ -1,7 +1,10 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -167,6 +170,35 @@ public class LuceneServiceImpl implements LuceneService{
                     }
                 }
             }
+            
+            String outputEvalFile = "results.txt";
+            String outputQrelFile = "qrels.txt";
+            createOutputFileIfNotExists(outputEvalFile);
+            createOutputFileIfNotExists(outputQrelFile);
+            
+            // Open the output file for writing
+            BufferedWriter evalWriter = Files.newBufferedWriter(Path.of(outputEvalFile), StandardOpenOption.APPEND);
+            BufferedWriter qrelWriter = Files.newBufferedWriter(Path.of(outputQrelFile), StandardOpenOption.APPEND);
+            //BufferedWriter evalWriter = new BufferedWriter(outputEvalFile, StandardOpenOption.APPEND);
+            //BufferedWriter qrelWriter = new BufferedWriter(new FileWriter(outputQrelFile));
+
+            // Write the results in TREC format to the output files
+            ScoreDoc[] scoreDocs = topTitleDocs.scoreDocs;
+            for (int rank = 0; rank < scoreDocs.length; rank++) {
+                ScoreDoc scoreDoc = scoreDocs[rank];
+                int docId = scoreDoc.doc;
+                Document document = indexSearcher.doc(docId);
+                String documentId = document.get("id");
+
+                // Write the TREC-formatted line to the output files
+                String trecLine = query.toString() + " 0 " + documentId + " " + "\n";
+                String qrelLine = query.toString() + " Q0 " + documentId + " " + (rank + 1) + " " + scoreDoc.score + " TF-IDF\n";
+                
+                qrelWriter.write(trecLine);
+                evalWriter.write(qrelLine);
+            }
+            evalWriter.close();
+            qrelWriter.close();
     
             System.out.println(searchResults.toString()); // Output to command line for node.js API to read
     
@@ -198,6 +230,14 @@ public class LuceneServiceImpl implements LuceneService{
         }
     
         return builder.build();
+    }
+    
+    //Checks if a JSON file exists to be created
+    private void createOutputFileIfNotExists(String outputFilePath) throws IOException {
+        Path path = Path.of(outputFilePath);
+        if (!Files.exists(path)) {
+            Files.createFile(path);
+        }
     }
     
 }
